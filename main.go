@@ -37,7 +37,7 @@ func main() {
 	}
 
 	c := cron.New()
-	err := c.AddFunc("0 0 8 * * *", func() {
+	err = c.AddFunc("0 0 8 * * *", func() {
 		checkin()
 	})
 	if err != nil {

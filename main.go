@@ -37,7 +37,12 @@ func main() {
 	}
 
 	c := cron.New()
-	err = c.AddFunc("0 0 8 * * *", func() {
+
+	cron := os.Getenv("CRON")
+	if len(cron) == 0 {
+		cron = "0 0 8 * * *" // 默认每天上午8点指定
+	}
+	err = c.AddFunc(cron, func() {
 		checkin()
 	})
 	if err != nil {

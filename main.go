@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -10,6 +11,12 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/robfig/cron"
 )
+
+var once bool
+
+func init() {
+	flag.BoolVar(&once, "once", false, "run once then exit")
+}
 
 // checkin login to shadowsky and checkin
 func checkin() {
@@ -34,6 +41,11 @@ func main() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("load dotenv config file", err.Error())
+	}
+
+	if once {
+		checkin()
+		return
 	}
 
 	c := cron.New()

@@ -36,6 +36,7 @@ func checkin() {
 }
 
 func main() {
+	flag.Parse()
 
 	log.Println("start shadowsky-qiandao, prepare to load config file")
 	err := godotenv.Load()
@@ -44,6 +45,7 @@ func main() {
 	}
 
 	if once {
+		log.Println("run once...")
 		checkin()
 		return
 	}

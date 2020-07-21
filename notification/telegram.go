@@ -1,4 +1,4 @@
-package tg
+package notification
 
 import (
 	"os"
@@ -7,8 +7,11 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+type TelegramChannel struct {
+}
+
 // SendMsg send notification message to specified telegram chat
-func SendMsg(message string) error {
+func (tc *TelegramChannel) Send(message Message) error {
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_KEY"))
 	if err != nil {
 		return err
@@ -17,10 +20,14 @@ func SendMsg(message string) error {
 	if err != nil {
 		return err
 	}
-	msg := tgbotapi.NewMessage(chatID, message)
+	msg := tgbotapi.NewMessage(chatID, message.Body)
 	_, err = bot.Send(msg)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (tc *TelegramChannel) Name() string {
+	return "telegram"
 }

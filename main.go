@@ -5,7 +5,8 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"shadowsky-qiandao/notification/tg"
+	"shadowsky-qiandao/notification"
+	"sync"
 	"syscall"
 
 	"github.com/joho/godotenv"
@@ -30,9 +31,32 @@ func checkin() {
 	}
 
 	log.Println(cr.Msg)
-	if os.Getenv("TELEGRAM_KEY") != "" {
-		tg.SendMsg("Shadowsky 签到结果：" + cr.Msg)
+
+	msgToSend := notification.Message{
+		Body: "Shadowsky 签到结果：" + cr.Msg,
 	}
+	var channels []notification.Channel
+	if os.Getenv("TELEGRAM_KEY") != "" {
+		channels = append(channels, &notification.TelegramChannel{})
+	}
+	if os.Getenv("DISCORD_WEBHOOK") != "" {
+		channels = append(channels, &notification.DiscordChannel{})
+	}
+	wg := sync.WaitGroup{}
+	wg.Add(len(channels))
+	for _, c := range channels {
+		ch := c
+		go func() {
+			defer wg.Done()
+			err := ch.Send(msgToSend)
+			if err != nil {
+				log.Printf("send notification error [%s]: %v", ch.Name(), err)
+			}
+			log.Printf("send notification [%s]", ch.Name())
+		}()
+	}
+	wg.Wait()
+	log.Printf("send notification complete, total %d", len(channels))
 }
 
 func main() {

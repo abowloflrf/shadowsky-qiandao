@@ -61,4 +61,4 @@ jobs:
 
       - name: Run Image
         run: |
-          docker run -it --rm docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME --help
+          docker run --rm docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME --help

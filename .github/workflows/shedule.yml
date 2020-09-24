@@ -2,7 +2,7 @@ name: Shedule Task
 
 on:
   schedule:
-      - "*/5 * * * *"
+      - cron: "*/5 * * * *"
 
 jobs:
     task:

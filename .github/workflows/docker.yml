@@ -8,7 +8,7 @@ on:
       - v*
 
 env:
-  IMAGE_NAME: app
+  IMAGE_NAME: shadowsky-qiandao
 
 jobs:
   build:

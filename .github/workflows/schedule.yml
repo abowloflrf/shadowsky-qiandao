@@ -2,14 +2,14 @@ name: Schedule Task
 
 on:
   schedule:
-      - cron: "0 0 * * *"
+    - cron: "0 0 * * *"
 env:
   IMAGE_NAME: shadowsky-qiandao
 
 jobs:
-    task:
-      runs-on: ubuntu-latest
-      steps:
+  task:
+    runs-on: ubuntu-latest
+    steps:
       - name: Log into registry
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
@@ -17,7 +17,14 @@ jobs:
       - name: Pull Docker Image
         run: |
           docker pull docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+          docker images
 
       - name: Run Image
         run: |
-          docker run --rm docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME --help
+          docker run --rm \
+            -e DISCORD_WEBHOOK=${{ secrets.GITHUB_TOKEN }} \
+            -e SHADOWSKY_EMAIL=${{ secrets.SHADOWSKY_EMAIL }} \
+            -e SHADOWSKY_PASSWORD=${{ secrets.SHADOWSKY_PASSWORD }} \
+            -e TELEGRAM_CHATID=${{ secrets.TELEGRAM_CHATID }} \
+            -e TELEGRAM_KEY=${{ secrets.TELEGRAM_KEY }} \
+            docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME -once

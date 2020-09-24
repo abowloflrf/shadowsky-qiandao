@@ -1,0 +1,23 @@
+name: Schedule Task
+
+on:
+  schedule:
+      - cron: "0 0 * * *"
+env:
+  IMAGE_NAME: shadowsky-qiandao
+
+jobs:
+    task:
+      runs-on: ubuntu-latest
+      steps:
+      - name: Log into registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+      - name: Pull Docker Image
+        run: |
+          docker pull docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+
+      - name: Run Image
+        run: |
+          docker run -it --rm docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME --help

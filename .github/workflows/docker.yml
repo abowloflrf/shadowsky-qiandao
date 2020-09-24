@@ -61,4 +61,10 @@ jobs:
 
       - name: Run Image
         run: |
-          docker run --rm docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME --help
+          docker run --rm \ 
+            -e DISCORD_WEBHOOK=${{ secrets.GITHUB_TOKEN }} \ 
+            -e SHADOWSKY_EMAIL=${{ secrets.SHADOWSKY_EMAIL }} \ 
+            -e SHADOWSKY_PASSWORD=${{ secrets.SHADOWSKY_PASSWORD }} \ 
+            -e TELEGRAM_CHATID=${{ secrets.TELEGRAM_CHATID }} \ 
+            -e TELEGRAM_KEY=${{ secrets.TELEGRAM_KEY }} \ 
+            docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME -once

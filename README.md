@@ -1,6 +1,8 @@
 # shadowsky 签到
 
-![Go](https://github.com/abowloflrf/shadowsky-qiandao/workflows/Go/badge.svg?branch=master)
+![Docker](https://github.com/abowloflrf/shadowsky-qiandao/workflows/Docker%20Image%20CI/badge.svg?branch=master)
+
+![Schedule Task](https://github.com/abowloflrf/shadowsky-qiandao/workflows/Schedule%20Task/badge.svg?branch=master)
 
 ```shell
 git clone https://github.com/abowloflrf/shadowsky-qiandao.git

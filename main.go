@@ -13,21 +13,31 @@ import (
 	"github.com/robfig/cron"
 )
 
-var once bool
+var (
+	once       bool
+	notifyOnly bool
+)
 
 func init() {
 	flag.BoolVar(&once, "once", false, "run once then exit")
+	flag.BoolVar(&notifyOnly, "notify-only", false, "dry-run, send notification only")
 }
 
 // checkin login to shadowsky and checkin
 func checkin() {
-	ss, err := NewShadowsky()
-	if err != nil {
-		log.Printf("login to shadowsky %v", err)
-	}
-	cr, err := ss.Checkin()
-	if err != nil {
-		log.Printf("check in %v", err)
+	cr := &CheckinResult{}
+	if !notifyOnly {
+		ss, err := NewShadowsky()
+		if err != nil {
+			log.Printf("login to shadowsky %v", err)
+		}
+		cr, err = ss.Checkin()
+		if err != nil {
+			log.Printf("check in %v", err)
+		}
+	} else {
+		// mock check result
+		cr.Msg = "Hey There..."
 	}
 
 	log.Println(cr.Msg)
@@ -75,7 +85,6 @@ func main() {
 	}
 
 	c := cron.New()
-
 	cron := os.Getenv("CRON")
 	if len(cron) == 0 {
 		cron = "0 0 8 * * *" // 默认每天上午8点指定

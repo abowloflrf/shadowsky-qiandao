@@ -62,7 +62,7 @@ jobs:
       - name: Run Image
         run: |
           docker run --rm \
-            -e DISCORD_WEBHOOK='${{ secrets.GITHUB_TOKEN }}' \
+            -e DISCORD_WEBHOOK='${{ secrets.DISCORD_WEBHOOK }}' \
             -e SHADOWSKY_EMAIL='${{ secrets.SHADOWSKY_EMAIL }}' \
             -e SHADOWSKY_PASSWORD='${{ secrets.SHADOWSKY_PASSWORD }}' \
             -e TELEGRAM_CHATID='${{ secrets.TELEGRAM_CHATID }}' \

@@ -67,4 +67,4 @@ jobs:
             -e SHADOWSKY_PASSWORD='${{ secrets.SHADOWSKY_PASSWORD }}' \
             -e TELEGRAM_CHATID='${{ secrets.TELEGRAM_CHATID }}' \
             -e TELEGRAM_KEY='${{ secrets.TELEGRAM_KEY }}' \
-            docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME -once
+            docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME -once -notify-only

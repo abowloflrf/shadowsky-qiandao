@@ -27,7 +27,11 @@ func main() {
 	log.Println("start shadowsky-qiandao, prepare to load config file")
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalln("load dotenv config file", err.Error())
+		if os.IsNotExist(err) {
+			log.Println(".env file not found")
+		} else {
+			log.Fatalln("load dotenv config file", err.Error())
+		}
 	}
 
 	if once {

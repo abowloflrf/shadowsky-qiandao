@@ -46,6 +46,7 @@ jobs:
           # push to docker.pkg.github.com
           docker tag docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
+          docker push docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
 
   run-docker:
     runs-on: ubuntu-latest

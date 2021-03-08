@@ -1,65 +1,52 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"os"
-	"regexp"
-	"shadowsky-qiandao/notification"
-	"strconv"
 	"sync"
 	"time"
+
+	"github.com/abowloflrf/shadowsky-qiandao/notification"
+	"github.com/abowloflrf/shadowsky-qiandao/notification/discord"
+	"github.com/abowloflrf/shadowsky-qiandao/notification/telegram"
 )
 
-// 成功： {Msg:获得了 259 MB流量. Ret:1}
-// 已签到： {Msg:您似乎已经签到过了... Ret:1}
-
-type CheckinResult struct {
-	Msg string `json:"msg"`
-	Ret int    `json:"ret"`
-}
-
-// DataN parse the checkin response message and get the number of free data in MB just got
-func (cr *CheckinResult) DataN() int {
-	compRegex := regexp.MustCompile(`^获得了 (\d+) MB流量$`)
-	res := compRegex.FindStringSubmatch(cr.Msg)
-	if len(res) != 2 {
-		return 0
-	}
-	n, err := strconv.Atoi(res[1])
-	if err != nil {
-		return 0
-	}
-	return n
-}
-
 // checkin login to shadowsky do checkin-job and send notification
-func checkin() {
+func checkin() error {
 	now := time.Now()
 	cr := &CheckinResult{}
 	if !notifyOnly {
-		ss, err := NewShadowsky()
+		ss, err := NewShadowsky(shadowskyEmail, shadowskyPassword,
+			&ShadowskyConfig{
+				URL:       shadowskyURL,
+				UserAgent: userAgent,
+			})
 		if err != nil {
-			log.Printf("login to shadowsky %v", err)
+			return fmt.Errorf("login to shadowsky %v", err)
 		}
 		cr, err = ss.Checkin()
 		if err != nil {
-			log.Printf("check in %v", err)
+			return err
 		}
 	} else {
 		// mock check result
 		cr.Msg = "Hey There..."
 	}
-	log.Println("checkin message:", cr.Msg)
-
+	log.Printf("checkin complete with message: %s, duration: %v", cr.Msg, time.Since(now))
 	msgToSend := notification.Message{
 		Body: "Shadowsky 签到结果：" + cr.Msg,
 	}
 	var channels []notification.Channel
-	if os.Getenv("TELEGRAM_KEY") != "" {
-		channels = append(channels, &notification.TelegramChannel{})
+	if telegramKey != "" {
+		channels = append(channels, &telegram.Channel{
+			Key:    telegramKey,
+			ChatID: telegramChatID,
+		})
 	}
-	if os.Getenv("DISCORD_WEBHOOK") != "" {
-		channels = append(channels, &notification.DiscordChannel{})
+	if discordWebhook != "" {
+		channels = append(channels, &discord.Channel{
+			Webhook: discordWebhook,
+		})
 	}
 	wg := sync.WaitGroup{}
 	wg.Add(len(channels))
@@ -75,5 +62,6 @@ func checkin() {
 		}()
 	}
 	wg.Wait()
-	log.Printf("send notification complete, total %d, task duration: %v", len(channels), time.Since(now))
+	log.Printf("send notification complete, total channels %d, duration: %v", len(channels), time.Since(now))
+	return nil
 }

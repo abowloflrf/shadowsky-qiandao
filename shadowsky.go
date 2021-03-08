@@ -5,25 +5,47 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
+	"regexp"
+	"strconv"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 )
 
-const addr = "https://www.shadowsky.icu"
+// ShadowskyConfig configuration for checkin
+type ShadowskyConfig struct {
+	URL       string
+	UserAgent string
+}
 
+// Shadowsky shadowsky instance
 type Shadowsky struct {
+	email       string
+	password    string
+	config      *ShadowskyConfig
 	restyClient *resty.Client
 }
 
-func NewShadowsky() (*Shadowsky, error) {
+// CheckinResult 签到结果
+// 成功： {Msg:获得了 259 MB流量. Ret:1}
+// 已签到： {Msg:您似乎已经签到过了... Ret:1}
+type CheckinResult struct {
+	Msg string `json:"msg"`
+	Ret int    `json:"ret"`
+}
+
+// NewShadowsky create new instance of shadowsky client
+func NewShadowsky(email string, password string, c *ShadowskyConfig) (*Shadowsky, error) {
 	s := &Shadowsky{
-		restyClient: resty.New(),
+		email:       email,
+		password:    password,
+		config:      c,
+		restyClient: resty.New().SetTimeout(5 * time.Second),
 	}
 	s.restyClient.SetHeaders(
 		map[string]string{
-			"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.34 Safari/537.36 Edg/81.0.416.20",
-			"Origin":     addr,
+			"User-Agent": s.config.UserAgent,
+			"Origin":     s.config.URL,
 		})
 	if err := s.login(); err != nil {
 		return nil, err
@@ -34,13 +56,13 @@ func NewShadowsky() (*Shadowsky, error) {
 // login to shadowsky and save sessionid to http client
 func (s *Shadowsky) login() error {
 	resp, err := s.restyClient.R().
-		SetHeader("Referer", addr+"/auth/login").
+		SetHeader("Referer", s.config.URL+"/auth/login").
 		SetFormData(map[string]string{
-			"email":       os.Getenv("SHADOWSKY_EMAIL"),
-			"passwd":      os.Getenv("SHADOWSKY_PASSWORD"),
+			"email":       s.email,
+			"passwd":      s.password,
 			"remember_me": "week",
 		}).
-		Post(addr + "/auth/login")
+		Post(s.config.URL + "/auth/login")
 	if err != nil {
 		return err
 	}
@@ -53,7 +75,7 @@ func (s *Shadowsky) login() error {
 // User get shadowsky user info
 func (s *Shadowsky) User() (string, error) {
 	resp, err := s.restyClient.R().
-		Get(addr + "/user")
+		Get(s.config.URL + "/user")
 	if err != nil {
 		return "", err
 	}
@@ -63,7 +85,7 @@ func (s *Shadowsky) User() (string, error) {
 
 // Checkin to get daily data
 func (s *Shadowsky) Checkin() (*CheckinResult, error) {
-	resp, err := s.restyClient.R().Post(addr + "/user/checkin")
+	resp, err := s.restyClient.R().Post(s.config.URL + "/user/checkin")
 	if err != nil {
 		return nil, err
 	}
@@ -74,4 +96,18 @@ func (s *Shadowsky) Checkin() (*CheckinResult, error) {
 	}
 	log.Printf("checkin resp: code %d ,  body %s", resp.StatusCode(), r.Msg)
 	return &r, nil
+}
+
+// Parse parse the checkin response message and get the number of free data in MB just got
+func (cr *CheckinResult) Parse() int {
+	compRegex := regexp.MustCompile(`^获得了 (\d+) MB流量$`)
+	res := compRegex.FindStringSubmatch(cr.Msg)
+	if len(res) != 2 {
+		return 0
+	}
+	n, err := strconv.Atoi(res[1])
+	if err != nil {
+		return 0
+	}
+	return n
 }

@@ -46,7 +46,7 @@ func main() {
 	cronExp = getEnvOr("CRON", "0 8 * * *")
 	// timezone = getEnvOr("TZ", "Asia/Shanghai")
 	shadowskyURL = getEnvOr("SHADOWSKY_URL", "https://www.shadowsky.xyz")
-	shadowskyEmail = os.Getenv("SHADOWNSKY_EMAIL")
+	shadowskyEmail = os.Getenv("SHADOWSKY_EMAIL")
 	shadowskyPassword = os.Getenv("SHADOWSKY_PASSWORD")
 	userAgent = getEnvOr("SHADOWSKY_UA", "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.72 Safari/537.36")
 	telegramChatID = os.Getenv("TELEGRAM_CHATID")

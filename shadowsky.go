@@ -29,8 +29,9 @@ type Shadowsky struct {
 // 成功： {Msg:获得了 259 MB流量. Ret:1}
 // 已签到： {Msg:您似乎已经签到过了... Ret:1}
 type CheckinResult struct {
-	Msg string `json:"msg"`
-	Ret int    `json:"ret"`
+	Msg       string `json:"msg"`
+	Ret       int    `json:"ret"`
+	ErrorCode int    `json:"error_code,omitempty"`
 }
 
 // NewShadowsky create new instance of shadowsky client
@@ -61,14 +62,16 @@ func (s *Shadowsky) login() error {
 			"passwd":      s.password,
 			"remember_me": "week",
 		}).
+		SetResult(CheckinResult{}).
 		Post(s.config.URL + "/auth/login")
 	if err != nil {
 		return err
 	}
+	log.Printf("login: %d, body: %+v", resp.StatusCode(), resp.Result().(*CheckinResult))
 	if resp.StatusCode() == http.StatusOK {
 		return nil
 	}
-	return fmt.Errorf("login: %d, body: %s", resp.StatusCode(), resp.String())
+	return fmt.Errorf("login failed: %d, body: %s", resp.StatusCode(), resp.String())
 }
 
 // User get shadowsky user info
@@ -85,11 +88,11 @@ func (s *Shadowsky) User() (string, error) {
 // Checkin to get daily data
 func (s *Shadowsky) Checkin() (*CheckinResult, error) {
 	resp, err := s.restyClient.R().SetResult(CheckinResult{}).Post(s.config.URL + "/user/checkin")
-	log.Printf("checkin resp: code %d, body %s", resp.StatusCode(), resp.String())
 	if err != nil {
 		return nil, err
 	}
 	cr := resp.Result().(*CheckinResult)
+	log.Printf("checkin resp: code %d, body %+v", resp.StatusCode(), cr)
 	return cr, nil
 }
 

@@ -63,9 +63,8 @@ jobs:
       - name: Run Image
         run: |
           docker run --rm \
-            -e DISCORD_WEBHOOK='${{ secrets.DISCORD_WEBHOOK }}' \
             -e SHADOWSKY_EMAIL='${{ secrets.SHADOWSKY_EMAIL }}' \
             -e SHADOWSKY_PASSWORD='${{ secrets.SHADOWSKY_PASSWORD }}' \
             -e TELEGRAM_CHATID='${{ secrets.TELEGRAM_CHATID }}' \
             -e TELEGRAM_KEY='${{ secrets.TELEGRAM_KEY }}' \
-            docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME -once -notify-only
+            docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME -once

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -69,7 +68,7 @@ func (s *Shadowsky) login() error {
 	if resp.StatusCode() == http.StatusOK {
 		return nil
 	}
-	return fmt.Errorf("login: %d", resp.StatusCode())
+	return fmt.Errorf("login: %d, body: %s", resp.StatusCode(), resp.String())
 }
 
 // User get shadowsky user info
@@ -85,17 +84,13 @@ func (s *Shadowsky) User() (string, error) {
 
 // Checkin to get daily data
 func (s *Shadowsky) Checkin() (*CheckinResult, error) {
-	resp, err := s.restyClient.R().Post(s.config.URL + "/user/checkin")
+	resp, err := s.restyClient.R().SetResult(CheckinResult{}).Post(s.config.URL + "/user/checkin")
+	log.Printf("checkin resp: code %d, body %s", resp.StatusCode(), resp.String())
 	if err != nil {
 		return nil, err
 	}
-	r := CheckinResult{}
-	err = json.Unmarshal(resp.Body(), &r)
-	if err != nil {
-		return nil, err
-	}
-	log.Printf("checkin resp: code %d ,  body %s", resp.StatusCode(), r.Msg)
-	return &r, nil
+	cr := resp.Result().(*CheckinResult)
+	return cr, nil
 }
 
 // Parse parse the checkin response message and get the number of free data in MB just got

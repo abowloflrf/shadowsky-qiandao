@@ -38,15 +38,10 @@ func checkin() error {
 	}
 	var channels []notification.Channel
 	if telegramKey != "" {
-		channels = append(channels, &telegram.Channel{
-			Key:    telegramKey,
-			ChatID: telegramChatID,
-		})
+		channels = append(channels, telegram.NewChannel(telegramKey, telegramChatID))
 	}
 	if discordWebhook != "" {
-		channels = append(channels, &discord.Channel{
-			Webhook: discordWebhook,
-		})
+		channels = append(channels, discord.NewChannel(discordWebhook))
 	}
 	wg := sync.WaitGroup{}
 	wg.Add(len(channels))

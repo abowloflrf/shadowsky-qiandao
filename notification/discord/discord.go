@@ -1,19 +1,26 @@
 package discord
 
 import (
-	"github.com/abowloflrf/shadowsky-qiandao/notification"
 	"github.com/go-resty/resty/v2"
+
+	"github.com/abowloflrf/shadowsky-qiandao/notification"
 )
 
-// Channel discord
-type Channel struct {
+// channel discord
+type channel struct {
 	Webhook string
 }
 
-var _ notification.Channel = &Channel{}
+var _ notification.Channel = &channel{}
+
+func NewChannel(webhook string) notification.Channel {
+	return &channel{
+		Webhook: webhook,
+	}
+}
 
 // Send notification message to discord chat
-func (dc *Channel) Send(message notification.Message) error {
+func (dc *channel) Send(message notification.Message) error {
 	client := resty.New()
 	_, err := client.R().
 		SetHeader("Content-Type", "application/json").
@@ -23,6 +30,6 @@ func (dc *Channel) Send(message notification.Message) error {
 }
 
 // Name of channel
-func (dc *Channel) Name() string {
+func (dc *channel) Name() string {
 	return "discord"
 }

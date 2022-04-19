@@ -12,7 +12,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted]
     if: github.event_name == 'push'
 
     steps:
@@ -49,7 +49,7 @@ jobs:
           docker push docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
 
   run-docker:
-    runs-on: ubuntu-20.04
+    runs-on: [self-hosted]
     steps:
       - name: Log into registry
         run: |
